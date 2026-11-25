@@ -353,7 +353,7 @@ export default function App() {
     <div className="min-h-full bg-paper px-4 py-6 sm:py-10">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl flex-col justify-center">
         {screen === 'home' && <Home state={state} onStart={() => setScreen('study')} />}
-        {screen === 'study' && <Study key={String(state.days?.length) + String(Object.keys(state.cards).length)} state={state} setState={setState} onDone={() => setScreen('end')} />}
+        {screen === 'study' && <Study state={state} setState={setState} onDone={() => setScreen('end')} />}
         {screen === 'end' && <SessionEnd state={state} onHome={() => setScreen('home')} onMore={() => setScreen('study')} />}
       </div>
     </div>
