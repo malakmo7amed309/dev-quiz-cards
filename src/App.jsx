@@ -3,10 +3,10 @@ import React, { useEffect, useMemo, useState } from 'react'
 // ---------- card data ----------
 
 const DECKS = [
-  { id: 'javascript', name: 'JavaScript', emoji: '🟨', accent: '#b45309' },
-  { id: 'react', name: 'React', emoji: '⚛️', accent: '#0369a1' },
-  { id: 'css', name: 'CSS', emoji: '🎨', accent: '#6d28d9' },
-  { id: 'html', name: 'HTML & Web', emoji: '🌐', accent: '#166534' },
+  { id: 'javascript', name: 'JavaScript', icon: 'js', accent: '#b45309' },
+  { id: 'react', name: 'React', icon: 'react', accent: '#0369a1' },
+  { id: 'css', name: 'CSS', icon: 'css', accent: '#6d28d9' },
+  { id: 'html', name: 'HTML & Web', icon: 'html', accent: '#166534' },
 ]
 
 const CARDS = [
@@ -130,6 +130,7 @@ function Home({ state, onStart }) {
 
   const totalDue = perDeck.reduce((s, d) => s + d.due, 0)
   const totalNew = perDeck.reduce((s, d) => s + (d.total - d.seen), 0)
+  const totalSeen = perDeck.reduce((s, d) => s + d.seen, 0)
   const totalMastered = perDeck.reduce((s, d) => s + d.mastered, 0)
   const allGrades = Object.values(state.cards).reduce((acc, c) => {
     Object.entries(c.grades || {}).forEach(([k, v]) => (acc[k] = (acc[k] || 0) + v))
@@ -158,7 +159,7 @@ function Home({ state, onStart }) {
 
       <div className="rounded-3xl bg-gradient-to-br from-ember to-[#9a3412] p-8 text-paper shadow-lg">
         <h1 className="font-display text-4xl font-semibold leading-tight">
-          {totalDue > 0 ? `${totalDue} card${totalDue === 1 ? '' : 's'} due today` : totalNew > 0 ? 'All caught up. Learn something new?' : 'Deck fully mastered. Impressive.'}
+          {totalDue > 0 ? `${totalDue} card${totalDue === 1 ? '' : 's'} due today` : totalNew > 0 ? (totalSeen === 0 ? 'Ready to start your first session?' : 'All caught up. Learn something new?') : 'Deck fully mastered. Impressive.'}
         </h1>
         <p className="mt-2 max-w-lg text-paper/80">
           A spaced-repetition engine schedules every review for you. Grade each card honestly and it comes back exactly when you are about to forget it.
@@ -173,7 +174,7 @@ function Home({ state, onStart }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatChip label="day streak" value={streak > 0 ? `${streak}🔥` : '0'} />
+        <StatChip label="day streak" value={streak > 0 ? <span className="inline-flex items-center gap-1">{streak}<Flame /></span> : '0'} />
         <StatChip label="mastered" value={`${totalMastered}/${CARDS.length}`} />
         <StatChip label="accuracy" value={accuracy === null ? '—' : `${accuracy}%`} />
         <StatChip label="reviews" value={totalGraded} />
@@ -183,7 +184,7 @@ function Home({ state, onStart }) {
         {perDeck.map((d) => (
           <div key={d.id} className="rounded-3xl bg-white/70 p-5 shadow-sm ring-1 ring-ink/5">
             <div className="flex items-center justify-between">
-              <div className="font-display text-xl font-semibold text-ink">{d.emoji} {d.name}</div>
+              <div className="font-display text-xl font-semibold text-ink"><span className="inline-flex items-center gap-2"><DeckIcon name={d.icon} /> {d.name}</span></div>
               <div className="text-sm font-medium text-ink/50">{d.seen}/{d.total} seen</div>
             </div>
             <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-ink/10">
@@ -285,7 +286,7 @@ function Study({ state, setState, onDone }) {
         >
           <div className="flex items-center justify-between">
             <span className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white" style={{ background: deck.accent }}>
-              {deck.emoji} {deck.name}
+              <span className="inline-flex items-center gap-2"><DeckIcon name={deck.icon} /> {deck.name}</span>
             </span>
             <span className="text-xs font-medium text-ink/40">{flipped ? 'answer' : 'question'}</span>
           </div>
@@ -323,7 +324,7 @@ function SessionEnd({ state, onHome, onMore }) {
   const fresh = CARDS.filter((c) => !state.cards[c.id]?.seen).length
   return (
     <div className="anim-deal mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center">
-      <div className="text-7xl">🎉</div>
+      <div className="text-ember"><Party /></div>
       <h2 className="font-display text-4xl font-semibold text-ink">Session complete</h2>
       <p className="text-ink/60">
         {remaining > 0 ? `${remaining} card${remaining === 1 ? '' : 's'} still due.` : fresh > 0 ? `${fresh} new card${fresh === 1 ? '' : 's'} waiting in the decks.` : 'Every card is scheduled. Come back tomorrow to keep the streak.'}
@@ -339,6 +340,21 @@ function SessionEnd({ state, onHome, onMore }) {
 }
 
 // ---------- app ----------
+
+
+function DeckIcon({ name }) {
+  const common = { width: 22, height: 22, viewBox: '0 0 24 24', 'aria-hidden': true }
+  if (name === 'js') return <svg {...common}><rect x="2" y="2" width="20" height="20" rx="4" fill="#f7df1e" /><text x="12" y="17" fontSize="11" fontWeight="800" textAnchor="middle" fill="#222" fontFamily="Arial">JS</text></svg>
+  if (name === 'react') return <svg {...common} fill="none" stroke="#0ea5e9" strokeWidth="1.5"><ellipse cx="12" cy="12" rx="10" ry="4" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" /><circle cx="12" cy="12" r="1.8" fill="#0ea5e9" /></svg>
+  if (name === 'css') return <svg {...common}><path d="M3 2l1.600 18L12 22l7.400-2L21 2z" fill="#6d28d9" /><path d="M16.500 8H8.300l.2 2.300h7.700l-.5 5.700-3.700 1-3.700-1-.2-2.400h2.300l.1 1.200 1.500.4 1.500-.4.200-2H8L7.600 6h9z" fill="#fff" /></svg>
+  return <svg {...common} fill="none" stroke="#166534" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9.500" /><ellipse cx="12" cy="12" rx="4" ry="9.500" /><path d="M2.500 12h19" /></svg>
+}
+function Flame() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2s5 4.500 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z" fill="#ea580c" /></svg>
+}
+function Party() {
+  return <svg width="72" height="72" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21l5-14 9 9z" fill="currentColor" fillOpacity=".15" /><path d="M14 4l1-2M18 8l2-1M16 3.500v0M20 12l2 .5M12 2v0" /></svg>
+}
 
 export default function App() {
   const [state, setStateRaw] = useState(loadState)
